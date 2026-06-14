@@ -8,13 +8,8 @@ yarn-error.log*
 .env.test
 .env.production
 
-load-testing/results.json
-
 # Load Testing
 load-testing/results.json
-load-testing/results.csv
-load-testing/graphs.html
-load-testing/summary-table.txt
 
 # Editor / OS
 .vscode/
