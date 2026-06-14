@@ -19,6 +19,8 @@
     "docker:ps": "docker-compose -f ../docker-compose.yml ps",
     "k6:run": "k6 run ../load-testing/k6-script.js",
     "k6:run:json": "k6 run --out json=../load-testing/results.json ../load-testing/k6-script.js",
+    "k6:graphs": "node ../load-testing/generate-graphs.js",
+    "k6:serve": "npx -y serve ../load-testing -p 3333",
     "health": "curl -s http://localhost/health | node -e \"process.stdin.resume();let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.stringify(JSON.parse(d),null,2)))\""
   },
   "dependencies": {
