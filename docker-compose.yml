@@ -1,0 +1,120 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: rs-postgres
+    environment:
+      POSTGRES_DB: reservation_db
+      POSTGRES_USER: rsuser
+      POSTGRES_PASSWORD: rspassword
+    volumes:
+      - ./backend/src/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rsuser -d reservation_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - rs-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: rs-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - rs-network
+
+  backend-1:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rs-backend-1
+    environment:
+      NODE_ENV: production
+      PORT: 8000
+      INSTANCE_ID: backend-1
+      DATABASE_URL: postgresql://rsuser:rspassword@postgres:5432/reservation_db
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - rs-network
+    restart: unless-stopped
+
+  backend-2:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rs-backend-2
+    environment:
+      NODE_ENV: production
+      PORT: 8000
+      INSTANCE_ID: backend-2
+      DATABASE_URL: postgresql://rsuser:rspassword@postgres:5432/reservation_db
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - rs-network
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rs-worker
+    command: ["node", "dist/worker/reservationWorker.js"]
+    environment:
+      NODE_ENV: production
+      INSTANCE_ID: worker
+      DATABASE_URL: postgresql://rsuser:rspassword@postgres:5432/reservation_db
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - rs-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: rs-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend-1
+      - backend-2
+    networks:
+      - rs-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  rs-network:
+    driver: bridge

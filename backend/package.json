@@ -1,0 +1,45 @@
+{
+  "name": "reservation-system-backend",
+  "version": "1.0.0",
+  "description": "Dissertation demo: Concurrency control strategies for high-traffic reservation systems",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "worker": "node dist/worker/reservationWorker.js",
+    "worker:dev": "ts-node-dev --respawn --transpile-only src/worker/reservationWorker.ts",
+    "docker:up": "docker-compose -f ../docker-compose.yml up --build",
+    "docker:up:detached": "docker-compose -f ../docker-compose.yml up --build -d",
+    "docker:down": "docker-compose -f ../docker-compose.yml down",
+    "docker:reset": "docker-compose -f ../docker-compose.yml down -v",
+    "docker:logs": "docker-compose -f ../docker-compose.yml logs -f",
+    "docker:logs:app": "docker-compose -f ../docker-compose.yml logs -f backend-1 backend-2",
+    "docker:logs:worker": "docker-compose -f ../docker-compose.yml logs -f worker",
+    "docker:ps": "docker-compose -f ../docker-compose.yml ps",
+    "k6:run": "k6 run ../load-testing/k6-script.js",
+    "k6:run:json": "k6 run --out json=../load-testing/results.json ../load-testing/k6-script.js",
+    "health": "curl -s http://localhost/health | node -e \"process.stdin.resume();let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.stringify(JSON.parse(d),null,2)))\""
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bullmq": "^5.4.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.3",
+    "ioredis": "^5.3.2",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.11.5",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20.12.7",
+    "@types/pg": "^8.11.5",
+    "@types/uuid": "^9.0.8",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.5"
+  }
+}
