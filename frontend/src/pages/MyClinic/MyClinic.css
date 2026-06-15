@@ -1,0 +1,133 @@
+.my-clinic-overview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 40px;
+  animation: fadeSlideUp 0.5s ease forwards;
+}
+
+.my-clinic-info-card {
+  padding: 28px;
+  background: white;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.my-clinic-info-card h1 {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  margin-bottom: 12px;
+}
+
+.my-clinic-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.my-clinic-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.my-clinic-stat strong {
+  color: var(--color-text);
+}
+
+/* ── Services section ───────────────────────────────────────────────── */
+.my-clinic-section {
+  margin-bottom: 40px;
+}
+
+.my-clinic-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.my-clinic-section-header h2 {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+}
+
+.my-clinic-services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.my-clinic-service-card {
+  padding: 20px;
+  background: white;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  transition: var(--transition-base);
+}
+
+.my-clinic-service-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.my-clinic-service-name {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.my-clinic-service-details {
+  display: flex;
+  gap: 16px;
+  font-size: 0.813rem;
+  color: var(--color-text-muted);
+}
+
+.my-clinic-service-details span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Reservations table ─────────────────────────────────────────────── */
+.my-clinic-table-wrapper {
+  overflow-x: auto;
+}
+
+.my-clinic-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.my-clinic-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--color-border-light);
+  background: var(--color-accent);
+}
+
+.my-clinic-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border-light);
+  color: var(--color-text);
+}
+
+.my-clinic-table tr:hover td {
+  background: rgba(234, 247, 239, 0.5);
+}
+
+@media (max-width: 768px) {
+  .my-clinic-overview {
+    grid-template-columns: 1fr;
+  }
+}

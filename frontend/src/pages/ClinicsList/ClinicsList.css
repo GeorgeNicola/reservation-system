@@ -1,0 +1,68 @@
+.clinics-header {
+  text-align: center;
+  margin-bottom: 40px;
+  animation: fadeSlideUp 0.5s ease forwards;
+}
+
+.clinics-header h1 {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.clinics-header p {
+  color: var(--color-text-muted);
+  font-size: 1.05rem;
+}
+
+.clinics-search {
+  max-width: 480px;
+  margin: 0 auto 32px;
+  position: relative;
+  animation: fadeSlideUp 0.5s ease 0.1s forwards;
+  opacity: 0;
+}
+
+.clinics-search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.clinics-search input {
+  width: 100%;
+  padding: 14px 16px 14px 44px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: 0.938rem;
+  outline: none;
+  transition: var(--transition-fast);
+  background: white;
+}
+
+.clinics-search input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+}
+
+.clinics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .clinics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .clinics-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,309 +1,393 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>K6 Load Test Results — Concurrency Control Comparison</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --naive: #ef4444;
-      --pessimistic: #3b82f6;
-      --distributed: #f59e0b;
-      --queued: #10b981;
-      --bg: #0f172a;
-      --card: #1e293b;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --border: #334155;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Inter', -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding: 30px 20px;
-      line-height: 1.6;
-    }
-    .header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-    .header h1 {
-      font-size: 28px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #60a5fa, #a78bfa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 8px;
-    }
-    .header p {
-      color: var(--muted);
-      font-size: 14px;
-    }
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      max-width: 1100px;
-      margin: 0 auto 40px auto;
-    }
-    .summary-card {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 20px;
-      border-left: 4px solid;
-    }
-    .summary-card.naive { border-color: var(--naive); }
-    .summary-card.pessimistic { border-color: var(--pessimistic); }
-    .summary-card.distributed { border-color: var(--distributed); }
-    .summary-card.queued { border-color: var(--queued); }
-    .summary-card h3 {
-      font-size: 14px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 12px;
-    }
-    .summary-card.naive h3 { color: var(--naive); }
-    .summary-card.pessimistic h3 { color: var(--pessimistic); }
-    .summary-card.distributed h3 { color: var(--distributed); }
-    .summary-card.queued h3 { color: var(--queued); }
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      padding: 3px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .stat-row:last-child { border-bottom: none; }
-    .stat-label { color: var(--muted); }
-    .stat-value { font-weight: 600; font-variant-numeric: tabular-nums; }
-    .summary-table-container {
-      max-width: 1100px;
-      margin: 0 auto 40px auto;
-      overflow-x: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--card);
-      border-radius: 12px;
-      overflow: hidden;
-      font-size: 14px;
-    }
-    th, td { padding: 12px 16px; text-align: right; }
-    th:first-child, td:first-child { text-align: left; }
-    th {
-      background: #0f172a;
-      color: var(--muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 11px;
-      letter-spacing: 0.5px;
-    }
-    td { border-top: 1px solid var(--border); font-variant-numeric: tabular-nums; }
-    tr:hover td { background: rgba(255,255,255,0.03); }
-    .chart-container {
-      width: 95%;
-      max-width: 1100px;
-      margin: 20px auto;
-      background: var(--card);
-      padding: 24px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-    }
-    .section-title {
-      text-align: center;
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--muted);
-      margin: 40px 0 16px 0;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>Concurrency Control Strategies — Load Test Results</h1>
-    <p>200 Virtual Users × 30 seconds per scenario | Hot spot: clinic_id=1, same time slot</p>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>K6 Load Test Results — Concurrency Control Comparison</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --naive: #ef4444;
+        --pessimistic: #3b82f6;
+        --distributed: #f59e0b;
+        --queued: #10b981;
+        --bg: #0f172a;
+        --card: #1e293b;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --border: #334155;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: "Inter", -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        padding: 30px 20px;
+        line-height: 1.6;
+      }
+      .header { text-align: center; margin-bottom: 40px; }
+      .header h1 {
+        font-size: 28px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #60a5fa, #a78bfa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 8px;
+      }
+      .header p { color: var(--muted); font-size: 14px; }
+      .header .generated-at { color: var(--border); font-size: 12px; margin-top: 4px; }
 
-  <!-- Summary Cards -->
-  <div class="summary-grid">
-    
-    <div class="summary-card naive">
-      <h3>⚠️ naive</h3>
-      <div class="stat-row"><span class="stat-label">Total Requests</span><span class="stat-value">45,939</span></div>
-      <div class="stat-row"><span class="stat-label">Throughput</span><span class="stat-value">~1531.3 req/s</span></div>
-      <div class="stat-row"><span class="stat-label">Avg Latency</span><span class="stat-value">30.5 ms</span></div>
-      <div class="stat-row"><span class="stat-label">p95 Latency</span><span class="stat-value">110.5 ms</span></div>
-      <div class="stat-row"><span class="stat-label">Max Latency</span><span class="stat-value">304.8 ms</span></div>
-      <div class="stat-row"><span class="stat-label">Status Codes</span><span class="stat-value">201:2 409:45937</span></div>
+      .loading {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--muted);
+        font-size: 18px;
+      }
+      .loading .spinner {
+        display: inline-block;
+        width: 40px; height: 40px;
+        border: 3px solid var(--border);
+        border-top-color: #60a5fa;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 16px;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      .error-msg {
+        text-align: center;
+        padding: 40px;
+        color: var(--naive);
+        background: var(--card);
+        border-radius: 12px;
+        max-width: 600px;
+        margin: 40px auto;
+      }
+      .error-msg code {
+        display: block;
+        margin-top: 12px;
+        padding: 12px;
+        background: var(--bg);
+        border-radius: 8px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        max-width: 1100px;
+        margin: 0 auto 40px auto;
+      }
+      .summary-card {
+        background: var(--card);
+        border-radius: 12px;
+        padding: 20px;
+        border-left: 4px solid;
+      }
+      .summary-card.naive { border-color: var(--naive); }
+      .summary-card.pessimistic { border-color: var(--pessimistic); }
+      .summary-card.distributed { border-color: var(--distributed); }
+      .summary-card.queued { border-color: var(--queued); }
+      .summary-card h3 {
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+      }
+      .summary-card.naive h3 { color: var(--naive); }
+      .summary-card.pessimistic h3 { color: var(--pessimistic); }
+      .summary-card.distributed h3 { color: var(--distributed); }
+      .summary-card.queued h3 { color: var(--queued); }
+      .stat-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        padding: 3px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .stat-row:last-child { border-bottom: none; }
+      .stat-label { color: var(--muted); }
+      .stat-value { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+      .summary-table-container {
+        max-width: 1100px;
+        margin: 0 auto 40px auto;
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--card);
+        border-radius: 12px;
+        overflow: hidden;
+        font-size: 14px;
+      }
+      th, td { padding: 12px 16px; text-align: right; }
+      th:first-child, td:first-child { text-align: left; }
+      th {
+        background: #0f172a;
+        color: var(--muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+      }
+      td { border-top: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+      tr:hover td { background: rgba(255,255,255,0.03); }
+
+      .chart-container {
+        width: 95%;
+        max-width: 1100px;
+        margin: 20px auto;
+        background: var(--card);
+        padding: 24px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+      }
+      .section-title {
+        text-align: center;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--muted);
+        margin: 40px 0 16px 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      #app { display: none; }
+    </style>
+  </head>
+  <body>
+    <!-- Loading state -->
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <div>Loading test results...</div>
     </div>
-    
-    <div class="summary-card pessimistic">
-      <h3>✅ pessimistic</h3>
-      <div class="stat-row"><span class="stat-label">Total Requests</span><span class="stat-value">22,613</span></div>
-      <div class="stat-row"><span class="stat-label">Throughput</span><span class="stat-value">~753.8 req/s</span></div>
-      <div class="stat-row"><span class="stat-label">Avg Latency</span><span class="stat-value">165.9 ms</span></div>
-      <div class="stat-row"><span class="stat-label">p95 Latency</span><span class="stat-value">221.9 ms</span></div>
-      <div class="stat-row"><span class="stat-label">Max Latency</span><span class="stat-value">364.5 ms</span></div>
-      <div class="stat-row"><span class="stat-label">Status Codes</span><span class="stat-value">409:22613</span></div>
+
+    <!-- Error state -->
+    <div id="error" class="error-msg" style="display: none;"></div>
+
+    <!-- Main app (hidden until data loads) -->
+    <div id="app">
+      <div class="header">
+        <h1>Concurrency Control Strategies — Load Test Results</h1>
+        <p id="config-line"></p>
+        <p class="generated-at" id="generated-at"></p>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="summary-grid" id="summary-cards"></div>
+
+      <!-- Comparison Table -->
+      <div class="summary-table-container">
+        <table id="summary-table"></table>
+      </div>
+
+      <!-- Charts -->
+      <div class="section-title">Time-Series Charts</div>
+
+      <div class="chart-container"><canvas id="throughputChart"></canvas></div>
+      <div class="chart-container"><canvas id="latencyChart"></canvas></div>
+      <div class="chart-container"><canvas id="p95Chart"></canvas></div>
+      <div class="chart-container"><canvas id="statusChart"></canvas></div>
     </div>
-    
-    <div class="summary-card distributed">
-      <h3>✅ distributed</h3>
-      <div class="stat-row"><span class="stat-label">Total Requests</span><span class="stat-value">11,253</span></div>
-      <div class="stat-row"><span class="stat-label">Throughput</span><span class="stat-value">~375.1 req/s</span></div>
-      <div class="stat-row"><span class="stat-label">Avg Latency</span><span class="stat-value">443.5 ms</span></div>
-      <div class="stat-row"><span class="stat-label">p95 Latency</span><span class="stat-value">3024.4 ms</span></div>
-      <div class="stat-row"><span class="stat-label">Max Latency</span><span class="stat-value">3130.3 ms</span></div>
-      <div class="stat-row"><span class="stat-label">Status Codes</span><span class="stat-value">409:10318 503:935</span></div>
-    </div>
-    
-    <div class="summary-card queued">
-      <h3>✅ queued</h3>
-      <div class="stat-row"><span class="stat-label">Total Requests</span><span class="stat-value">36,797</span></div>
-      <div class="stat-row"><span class="stat-label">Throughput</span><span class="stat-value">~1226.6 req/s</span></div>
-      <div class="stat-row"><span class="stat-label">Avg Latency</span><span class="stat-value">43.9 ms</span></div>
-      <div class="stat-row"><span class="stat-label">p95 Latency</span><span class="stat-value">105.6 ms</span></div>
-      <div class="stat-row"><span class="stat-label">Max Latency</span><span class="stat-value">233.7 ms</span></div>
-      <div class="stat-row"><span class="stat-label">Status Codes</span><span class="stat-value">200:1772 202:35025</span></div>
-    </div>
-    
-  </div>
 
-  <!-- Full Comparison Table -->
-  <div class="summary-table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>Metric</th>
-          <th>NAIVE</th><th>PESSIMISTIC</th><th>DISTRIBUTED</th><th>QUEUED</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>Total Requests</td><td>45,939</td><td>22,613</td><td>11,253</td><td>36,797</td></tr>
-        <tr><td>Throughput (req/s)</td><td>~1531.3</td><td>~753.8</td><td>~375.1</td><td>~1226.6</td></tr>
-        <tr><td>Avg Latency (ms)</td><td>30.5</td><td>165.9</td><td>443.5</td><td>43.9</td></tr>
-        <tr><td>Median Latency (ms)</td><td>12.3</td><td>159.3</td><td>6.0</td><td>33.6</td></tr>
-        <tr><td>p95 Latency (ms)</td><td>110.5</td><td>221.9</td><td>3024.4</td><td>105.6</td></tr>
-        <tr><td>p99 Latency (ms)</td><td>155.7</td><td>259.1</td><td>3076.7</td><td>133.2</td></tr>
-        <tr><td>Min Latency (ms)</td><td>0.5</td><td>26.1</td><td>1.5</td><td>1.0</td></tr>
-        <tr><td>Max Latency (ms)</td><td>304.8</td><td>364.5</td><td>3130.3</td><td>233.7</td></tr>
-        <tr><td>Status Codes</td><td>201:2 409:45937</td><td>409:22613</td><td>409:10318 503:935</td><td>200:1772 202:35025</td></tr>
-      </tbody>
-    </table>
-  </div>
+    <script>
+      const SCENARIO_META = {
+        hot_spot_naive:       { label: "NAIVE",       color: "#ef4444", cssClass: "naive" },
+        hot_spot_pessimistic: { label: "PESSIMISTIC", color: "#3b82f6", cssClass: "pessimistic" },
+        hot_spot_distributed: { label: "DISTRIBUTED", color: "#f59e0b", cssClass: "distributed" },
+        hot_spot_queued:      { label: "QUEUED",      color: "#10b981", cssClass: "queued" },
+      };
 
-  <!-- Charts -->
-  <div class="section-title">Time-Series Charts</div>
-
-  <div class="chart-container">
-    <canvas id="throughputChart"></canvas>
-  </div>
-
-  <div class="chart-container">
-    <canvas id="latencyChart"></canvas>
-  </div>
-
-  <div class="chart-container">
-    <canvas id="p95Chart"></canvas>
-  </div>
-
-  <div class="chart-container">
-    <canvas id="statusChart"></canvas>
-  </div>
-
-  <script>
-    const data = {"hot_spot_naive":{"throughput":[917,1593,1772,1842,1910,1937,1827,1927,1848,1903,1879,1910,1737,1769,1815,1904,1613,1254,1301,1217,1379,1287,1114,1129,1215,1207,1102,1201,1033,1077,320,0,0,0,0,0],"latency":[74.6,27.1,12.3,8.4,5,3.2,9,3.1,8.3,4.6,6.2,4.7,14,11.6,10.8,4.6,23,56,48.2,71.2,44.6,53.6,75.5,74.2,71.1,63.4,78.9,67.4,86.8,88.1,78.3,0,0,0,0,0],"p95":[182.8,57.4,24.9,26.5,13.9,7,29.2,6.1,31.2,13,18.5,15.7,32,27,41,14,62.3,181.8,113.5,216.7,102.9,98.2,129.5,132.3,129.6,109.7,152,129.2,155.7,146.8,139.8,0,0,0,0,0],"status201":[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"status409":[915,1593,1772,1842,1910,1937,1827,1927,1848,1903,1879,1910,1737,1769,1815,1904,1613,1254,1301,1217,1379,1287,1114,1129,1215,1207,1102,1201,1033,1077,320,0,0,0,0,0],"status503":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"status202":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},"hot_spot_pessimistic":{"throughput":[530,688,762,754,796,764,798,791,747,758,733,684,743,738,695,790,795,727,640,723,740,661,749,729,759,797,824,821,791,789,297,0,0,0,0,0],"latency":[179.9,191.8,157.7,171.5,150.1,159.9,152,152.7,158.3,165,176.2,194.8,165,171.6,190,150.6,153.1,160.5,213.9,186.2,169.6,196.6,169.1,178.2,158.8,155.6,140.3,144.7,147.5,156,147.1,0,0,0,0,0],"p95":[271.5,239,187.7,202.8,165.3,180.6,164.3,168.2,189.6,199.2,200.4,252,187.9,203.3,295.8,164.1,165.3,202.4,255.5,242.5,184.1,252.5,190.1,204.7,171.2,178.4,152.9,162.6,184.5,187.6,159,0,0,0,0,0],"status201":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"status409":[530,688,762,754,796,764,798,791,747,758,733,684,743,738,695,790,795,727,640,723,740,661,749,729,759,797,824,821,791,789,297,0,0,0,0,0],"status503":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"status202":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},"hot_spot_distributed":{"throughput":[227,306,309,401,346,323,368,372,367,357,378,391,407,384,388,396,349,393,393,369,394,404,364,361,358,372,391,397,380,363,190,50,5,0,0,0],"latency":[169.7,275.8,180.8,768.1,455.8,379.6,527.9,419.6,471.1,400,488.6,367.2,462.5,381.1,383.3,470,442.4,394.7,420.7,439.3,367.7,465,394.7,432.3,461.3,443.6,460.3,358.9,502.4,367.9,855,2709.4,3038,0,0,0],"p95":[722.9,1538.3,786.4,3078.6,3038.1,2994.2,3051.4,3028.2,3035,3024,3045.3,3010.6,3034.2,3001.6,3015.4,3038.7,3034.1,3000.6,2995.3,2984.1,2955.6,2975.2,2954.5,2981.5,3029.9,3034.5,3052.3,3023.6,3043.8,3016,3029,3085.8,3077.8,0,0,0],"status201":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"status409":[227,306,309,317,320,306,326,341,335,332,341,368,372,360,361,360,322,362,363,335,368,365,340,332,323,340,355,372,342,341,166,11,0,0,0,0],"status503":[0,0,0,84,26,17,42,31,32,25,37,23,35,24,27,36,27,31,30,34,26,39,24,29,35,32,36,25,38,22,24,39,5,0,0,0],"status202":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},"hot_spot_queued":{"throughput":[864,1128,1439,1350,1398,1423,1359,1308,1371,1413,1427,1070,1040,1314,1119,1123,1079,1088,1379,1389,1220,1030,1100,1135,1116,1059,1081,1228,1316,1099,332,0,0,0,0,0],"latency":[71.5,60.6,22.6,25.1,25.2,21.7,27.7,35.2,22,22.4,15.9,57.4,75.5,37.4,59.8,57.7,64.8,68.6,27.8,25.2,45.8,74,57.4,58.6,59.3,64.4,64.8,47.5,27.6,60.1,52.3,0,0,0,0,0],"p95":[183.2,119.3,53,50,47,39,42,74.1,38.4,52.4,30.2,110.9,143.1,93.2,110.9,99.5,117.2,109.2,62.9,54.1,84,136.7,104,116.4,110.1,118.1,113.8,104.8,67.1,116.3,102.4,0,0,0,0,0],"status201":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"status409":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"status503":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"status202":[854,1068,1385,1277,1334,1362,1291,1251,1296,1348,1342,1015,991,1253,1067,1076,1026,1040,1318,1330,1166,970,1046,1084,1059,999,1028,1174,1252,1036,287,0,0,0,0,0]}};
-    const labels = Array.from({length: 36}, (_, i) => i + 's');
-
-    const scenarioMeta = {
-      'hot_spot_naive':       { label: 'NAIVE',       color: '#ef4444' },
-      'hot_spot_pessimistic': { label: 'PESSIMISTIC', color: '#3b82f6' },
-      'hot_spot_distributed': { label: 'DISTRIBUTED', color: '#f59e0b' },
-      'hot_spot_queued':      { label: 'QUEUED',      color: '#10b981' }
-    };
-
-    Chart.defaults.color = '#94a3b8';
-    Chart.defaults.borderColor = '#334155';
-
-    function makeDatasets(metricKey) {
-      return Object.keys(data).map(s => ({
-        label: scenarioMeta[s]?.label || s,
-        data: data[s][metricKey],
-        borderColor: scenarioMeta[s]?.color || '#888',
-        backgroundColor: scenarioMeta[s]?.color + '20',
-        borderWidth: 2.5,
-        pointRadius: 0,
-        tension: 0.3,
-        fill: false
-      }));
-    }
-
-    function makeChart(id, title, yLabel, metricKey) {
-      new Chart(document.getElementById(id), {
-        type: 'line',
-        data: { labels, datasets: makeDatasets(metricKey) },
-        options: {
-          responsive: true,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            title: { display: true, text: title, font: { size: 16, weight: '600' }, color: '#e2e8f0' },
-            legend: { labels: { usePointStyle: true, padding: 20 } }
-          },
-          scales: {
-            x: { title: { display: true, text: 'Time (seconds from scenario start)' } },
-            y: { beginAtZero: true, title: { display: true, text: yLabel } }
-          }
-        }
-      });
-    }
-
-    makeChart('throughputChart', 'Throughput Over Time', 'Requests / Second', 'throughput');
-    makeChart('latencyChart',   'Average Latency Over Time', 'Latency (ms)', 'latency');
-    makeChart('p95Chart',       'p95 Latency Over Time', 'p95 Latency (ms)', 'p95');
-
-    // Status code stacked bar chart — one per scenario
-    const statusScenarios = Object.keys(data);
-    const statusDatasets = [];
-    const statusLabels = statusScenarios.map(s => scenarioMeta[s]?.label || s);
-
-    function sumArray(arr) { return arr.reduce((a, b) => a + b, 0); }
-
-    const codeColors = { '201': '#22c55e', '202': '#3b82f6', '409': '#f59e0b', '503': '#ef4444' };
-    const codeKeys = ['status201', 'status202', 'status409', 'status503'];
-    const codeLabels = ['201 Created', '202 Accepted', '409 Conflict', '503 Busy'];
-
-    codeKeys.forEach((key, idx) => {
-      statusDatasets.push({
-        label: codeLabels[idx],
-        data: statusScenarios.map(s => sumArray(data[s][key])),
-        backgroundColor: codeColors[key.replace('status', '')],
-        borderWidth: 0,
-        borderRadius: 4
-      });
-    });
-
-    new Chart(document.getElementById('statusChart'), {
-      type: 'bar',
-      data: { labels: statusLabels, datasets: statusDatasets },
-      options: {
-        responsive: true,
-        plugins: {
-          title: { display: true, text: 'HTTP Status Code Distribution', font: { size: 16, weight: '600' }, color: '#e2e8f0' },
-          legend: { labels: { usePointStyle: true, padding: 20 } }
-        },
-        scales: {
-          x: { stacked: true },
-          y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Total Requests' } }
+      async function loadData() {
+        try {
+          const res = await fetch("results-processed.json");
+          if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
+          return await res.json();
+        } catch (err) {
+          throw new Error(
+            `Could not load results-processed.json.\n\n` +
+            `Make sure you have run:\n  node generate-graphs.js\n\n` +
+            `Error: ${err.message}`
+          );
         }
       }
-    });
-  </script>
-</body>
+
+      function renderSummaryCards(summary) {
+        const container = document.getElementById("summary-cards");
+        container.innerHTML = Object.entries(summary)
+          .map(([name, s]) => {
+            const icon = name === "naive" ? "⚠️" : "✅";
+            const statusStr = Object.entries(s.statusCodes)
+              .map(([k, v]) => `${k}:${v.toLocaleString()}`)
+              .join(" ");
+            return `
+              <div class="summary-card ${name}">
+                <h3>${icon} ${name}</h3>
+                <div class="stat-row"><span class="stat-label">Total Requests</span><span class="stat-value">${Number(s.totalRequests).toLocaleString()}</span></div>
+                <div class="stat-row"><span class="stat-label">Throughput</span><span class="stat-value">~${s.throughput} req/s</span></div>
+                <div class="stat-row"><span class="stat-label">Avg Latency</span><span class="stat-value">${s.avgLatency} ms</span></div>
+                <div class="stat-row"><span class="stat-label">p95 Latency</span><span class="stat-value">${s.p95Latency} ms</span></div>
+                <div class="stat-row"><span class="stat-label">Max Latency</span><span class="stat-value">${s.maxLatency} ms</span></div>
+                <div class="stat-row"><span class="stat-label">Status Codes</span><span class="stat-value">${statusStr}</span></div>
+              </div>`;
+          })
+          .join("");
+      }
+
+      function renderTable(summary) {
+        const names = Object.keys(summary);
+        const vals = Object.values(summary);
+        const table = document.getElementById("summary-table");
+
+        const metrics = [
+          { label: "Total Requests",      fn: s => Number(s.totalRequests).toLocaleString() },
+          { label: "Throughput (req/s)",   fn: s => `~${s.throughput}` },
+          { label: "Avg Latency (ms)",     fn: s => s.avgLatency },
+          { label: "Median Latency (ms)",  fn: s => s.medianLatency },
+          { label: "p95 Latency (ms)",     fn: s => s.p95Latency },
+          { label: "p99 Latency (ms)",     fn: s => s.p99Latency },
+          { label: "Min Latency (ms)",     fn: s => s.minLatency },
+          { label: "Max Latency (ms)",     fn: s => s.maxLatency },
+          { label: "Status Codes",         fn: s => Object.entries(s.statusCodes).map(([k,v]) => `<strong>${k}</strong>:${v.toLocaleString()}`).join(" ") },
+        ];
+
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Metric</th>
+              ${names.map(n => `<th>${n.toUpperCase()}</th>`).join("")}
+            </tr>
+          </thead>
+          <tbody>
+            ${metrics.map(m => `
+              <tr>
+                <td>${m.label}</td>
+                ${vals.map(s => `<td>${m.fn(s)}</td>`).join("")}
+              </tr>
+            `).join("")}
+          </tbody>`;
+      }
+
+      function makeDatasets(data, metricKey) {
+        return Object.keys(data).map(s => ({
+          label: SCENARIO_META[s]?.label || s,
+          data: data[s][metricKey],
+          borderColor: SCENARIO_META[s]?.color || "#888",
+          backgroundColor: (SCENARIO_META[s]?.color || "#888") + "20",
+          borderWidth: 2.5,
+          pointRadius: 0,
+          tension: 0.3,
+          fill: false,
+        }));
+      }
+
+      function makeChart(id, title, yLabel, data, metricKey) {
+        const labels = Array.from({ length: 36 }, (_, i) => i + "s");
+        new Chart(document.getElementById(id), {
+          type: "line",
+          data: { labels, datasets: makeDatasets(data, metricKey) },
+          options: {
+            responsive: true,
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+              title: { display: true, text: title, font: { size: 16, weight: "600" }, color: "#e2e8f0" },
+              legend: { labels: { usePointStyle: true, padding: 20 } },
+            },
+            scales: {
+              x: { title: { display: true, text: "Time (seconds from scenario start)" } },
+              y: { beginAtZero: true, title: { display: true, text: yLabel } },
+            },
+          },
+        });
+      }
+
+      function makeStatusChart(data) {
+        const scenarios = Object.keys(data);
+        const labels = scenarios.map(s => SCENARIO_META[s]?.label || s);
+
+        const codeConfig = [
+          { key: "status201", label: "201 Created",  color: "#22c55e" },
+          { key: "status202", label: "202 Accepted", color: "#3b82f6" },
+          { key: "status409", label: "409 Conflict", color: "#f59e0b" },
+          { key: "status503", label: "503 Busy",     color: "#ef4444" },
+        ];
+
+        const datasets = codeConfig.map(c => ({
+          label: c.label,
+          data: scenarios.map(s => data[s][c.key].reduce((a, b) => a + b, 0)),
+          backgroundColor: c.color,
+          borderWidth: 0,
+          borderRadius: 4,
+        }));
+
+        new Chart(document.getElementById("statusChart"), {
+          type: "bar",
+          data: { labels, datasets },
+          options: {
+            responsive: true,
+            plugins: {
+              title: { display: true, text: "HTTP Status Code Distribution", font: { size: 16, weight: "600" }, color: "#e2e8f0" },
+              legend: { labels: { usePointStyle: true, padding: 20 } },
+            },
+            scales: {
+              x: { stacked: true },
+              y: { stacked: true, beginAtZero: true, title: { display: true, text: "Total Requests" } },
+            },
+          },
+        });
+      }
+
+      // ─── Main ──────────────────────────────────────────────────────────
+      (async function main() {
+        const loadingEl = document.getElementById("loading");
+        const errorEl = document.getElementById("error");
+        const appEl = document.getElementById("app");
+
+        try {
+          const result = await loadData();
+
+          // Set header info
+          document.getElementById("config-line").textContent =
+            `${result.config.vus} Virtual Users × ${result.config.durationPerScenario} per scenario | Hot spot: ${result.config.hotSpot}`;
+          document.getElementById("generated-at").textContent =
+            `Data processed at: ${new Date(result.generatedAt).toLocaleString()}`;
+
+          // Render summary
+          renderSummaryCards(result.summary);
+          renderTable(result.summary);
+
+          // Render charts
+          Chart.defaults.color = "#94a3b8";
+          Chart.defaults.borderColor = "#334155";
+
+          makeChart("throughputChart", "Throughput Over Time", "Requests / Second", result.timeSeries, "throughput");
+          makeChart("latencyChart", "Average Latency Over Time", "Latency (ms)", result.timeSeries, "latency");
+          makeChart("p95Chart", "p95 Latency Over Time", "p95 Latency (ms)", result.timeSeries, "p95");
+          makeStatusChart(result.timeSeries);
+
+          // Show app, hide loading
+          loadingEl.style.display = "none";
+          appEl.style.display = "block";
+        } catch (err) {
+          loadingEl.style.display = "none";
+          errorEl.style.display = "block";
+          errorEl.innerHTML = `
+            <h2>⚠️ Could not load results</h2>
+            <p style="margin-top:12px; color: var(--muted);">Make sure you have generated the processed data first:</p>
+            <code>node generate-graphs.js</code>
+            <p style="margin-top:12px; color: var(--muted); font-size: 13px;">${err.message}</p>
+          `;
+        }
+      })();
+    </script>
+  </body>
 </html>

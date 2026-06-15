@@ -1,0 +1,210 @@
+.clinic-detail {
+  animation: fadeSlideUp 0.5s ease forwards;
+}
+
+.clinic-detail-header {
+  margin-bottom: 32px;
+}
+
+.clinic-detail-header h1 {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.clinic-detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+/* ── Services Section ───────────────────────────────────────────────── */
+.clinic-services-section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 16px;
+}
+
+.clinic-service-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border: 2px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: var(--transition-base);
+  background: white;
+}
+
+.clinic-service-item:hover {
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.clinic-service-item.selected {
+  border-color: var(--color-primary);
+  background: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+}
+
+.clinic-service-info h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.clinic-service-info p {
+  font-size: 0.813rem;
+  color: var(--color-text-muted);
+}
+
+.clinic-service-meta {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.clinic-service-price {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.clinic-service-duration {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.clinic-service-check {
+  color: var(--color-primary);
+  font-size: 1.2rem;
+  margin-left: 12px;
+  animation: checkmark 0.3s ease;
+}
+
+/* ── Booking Section ────────────────────────────────────────────────── */
+.clinic-booking-section {
+  position: sticky;
+  top: calc(var(--navbar-height) + 24px);
+}
+
+.clinic-booking-card {
+  padding: 24px;
+  background: white;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+}
+
+.clinic-booking-card h2 {
+  font-size: 1.15rem;
+  margin-bottom: 20px;
+}
+
+.clinic-booking-divider {
+  height: 1px;
+  background: var(--color-border-light);
+  margin: 20px 0;
+}
+
+.clinic-booking-summary {
+  margin-bottom: 16px;
+}
+
+.clinic-booking-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.clinic-booking-summary-item span {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.clinic-booking-prompt {
+  text-align: center;
+  padding: 24px;
+  color: var(--color-text-muted);
+  font-size: 0.938rem;
+}
+
+.clinic-booking-login {
+  text-align: center;
+  padding: 16px;
+  background: var(--color-accent);
+  border-radius: var(--radius-md);
+  margin-top: 16px;
+}
+
+.clinic-booking-login p {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin-bottom: 12px;
+}
+
+/* ── Success modal ──────────────────────────────────────────────────── */
+.booking-success {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.booking-success-icon {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  font-size: 2rem;
+  animation: expandCheck 0.5s ease;
+}
+
+.booking-success h3 {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  margin-bottom: 8px;
+}
+
+.booking-success p {
+  color: var(--color-text-muted);
+  font-size: 0.938rem;
+  margin-bottom: 24px;
+}
+
+.booking-success-details {
+  text-align: left;
+  background: var(--color-accent);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.booking-success-detail {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  padding: 6px 0;
+}
+
+.booking-success-detail:not(:last-child) {
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+@media (max-width: 768px) {
+  .clinic-detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .clinic-booking-section {
+    position: static;
+  }
+}
